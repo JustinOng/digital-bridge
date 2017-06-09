@@ -37,13 +37,25 @@ void setup() {
   }
 }
 
-void lcd_print_byte(uint8_t &data) {
-  for(int8_t i = 7; i >= 0; i--) {
-    if (data & (1<<i)) {
-      lcd.print(1);
+void lcd_print_byte(uint8_t &data, uint8_t invert = 0) {
+  if (!invert) {
+    for(int8_t i = 7; i >= 0; i--) {
+      if (data & (1<<i)) {
+        lcd.print(1);
+      }
+      else {
+        lcd.print(0);
+      }
     }
-    else {
-      lcd.print(0);
+  }
+  else {
+    for(uint8_t i = 0; i < 8; i++) {
+      if (data & (1<<i)) {
+        lcd.print(1);
+      }
+      else {
+        lcd.print(0);
+      }
     }
   }
 }
@@ -57,7 +69,7 @@ void tx_loop() {
 
   if (data != pData) {
     lcd.setCursor(0, 1);
-    lcd_print_byte(data);
+    lcd_print_byte(data, 1);
   }
 
   pData = data;
@@ -74,7 +86,7 @@ void rx_loop() {
 
     if (data != pData) {
       lcd.setCursor(0, 1);
-      lcd_print_byte(data);
+      lcd_print_byte(data, 1);
     }
 
     pData = data;
