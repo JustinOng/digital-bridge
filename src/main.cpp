@@ -94,8 +94,15 @@ void rx_loop() {
 }
 
 void loop() {
+  static uint32_t last_tx = millis();
+
+  // throttle tx
   if (AM_TX) {
-    tx_loop();
+    if ((millis() - last_tx) > 50) {
+      tx_loop();
+
+      last_tx = millis();
+    }
   }
   else {
     rx_loop();
