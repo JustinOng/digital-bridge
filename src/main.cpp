@@ -60,6 +60,8 @@ void lcd_print_byte(uint8_t &data, uint8_t invert = 0) {
   }
 }
 
+uint32_t last_message = 0;
+
 void tx_loop() {
   static uint8_t pData = 0;
 
@@ -70,6 +72,13 @@ void tx_loop() {
   if (data != pData) {
     lcd.setCursor(0, 1);
     lcd_print_byte(data, 1);
+  }
+
+  if (Serial.available()) {
+    // rx will reply with 0xA3 upon receiving data
+    if (Serial.read() == 0xA3) {
+      last_message = millis();
+    }
   }
 
   pData = data;
@@ -89,6 +98,11 @@ void rx_loop() {
       lcd_print_byte(data, 1);
     }
 
+    // "ack" to tx
+    Serial.write(0xA3);
+
+    last_message = millis();
+
     pData = data;
   }
 }
@@ -106,5 +120,14 @@ void loop() {
   }
   else {
     rx_loop();
+  }
+
+  if ((millis() - last_message) < 500) {
+    lcd.setCursor(8, 1);
+    lcd.print("      Ok");
+  }
+  else {
+    lcd.setCursor(8, 1);
+    lcd.print("No data!");
   }
 }
